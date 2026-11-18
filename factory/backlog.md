@@ -1,6 +1,7 @@
 # Backlog
 
-Run the first unchecked item with `/factory next`. The orchestrator checks it
+Start the first unchecked item with `/factory next` (or several with
+`/factory next 3`). `[~]` means in progress. The orchestrator checks it
 off when the job merges.
 
 - [ ] Hello-world CLI: a script that prints a greeting, with one test

@@ -16,8 +16,9 @@
   header { display: flex; align-items: baseline; gap: 12px; padding: 16px 20px; }
   header h1 { font-size: 16px; margin: 0; letter-spacing: .04em; }
   header span { color: var(--dim); font-size: 12px; }
-  .board { display: grid; grid-template-columns: repeat(6, 1fr);
-           gap: 10px; padding: 0 20px 20px; align-items: start; }
+  header .live { margin-left: auto; color: var(--text); }
+  .board { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr));
+           gap: 10px; padding: 0 20px 20px; align-items: start; overflow-x: auto; }
   .col { background: var(--col); border-radius: 10px; padding: 10px; min-height: 140px; }
   .col h2 { margin: 2px 4px 10px; font-size: 11px; font-weight: 600;
             text-transform: uppercase; letter-spacing: .1em; color: var(--dim); }
@@ -28,6 +29,8 @@
   .card.human { border-color: var(--human); box-shadow: 0 0 0 1px var(--human); }
   .card .id { font-size: 11px; color: var(--dim); font-family: ui-monospace, monospace; }
   .card .title { margin: 2px 0 8px; font-weight: 600; }
+  .modal-head .sub { display: block; font-weight: 400; font-size: 11px; color: var(--dim);
+                     font-family: ui-monospace, monospace; margin-top: 2px; }
   .round { font-size: 11px; color: var(--dim); margin-bottom: 4px; }
   .chips { display: flex; gap: 5px; }
   .chip { flex: 1; text-align: center; font-size: 10px; padding: 3px 0;
@@ -55,19 +58,22 @@
 <body>
 <header>
   <h1>SOFTWARE FACTORY</h1>
-  <span>spec → build → review ×4 → approve → merge · polls board.json</span>
+  <span>spec → build → review ×4 → approve → merge · one worktree per job · polls board.json</span>
+  <span class="live" id="live"></span>
 </header>
 <div class="board" id="board"></div>
 
 <dialog id="modal">
-  <div class="modal-head"><strong id="modal-title"></strong>
+  <div class="modal-head"><div><strong id="modal-title"></strong>
+    <span class="sub" id="modal-sub"></span></div>
     <button onclick="modal.close()" aria-label="Close">✕</button></div>
   <div class="tabs" id="tabs"></div>
   <pre class="doc" id="doc"></pre>
 </dialog>
 
 <script>
-const STAGES = ["spec", "build", "review", "approval", "needs-human", "merged"];
+const STAGES = ["spec", "build", "review", "approval", "merge", "needs-human", "merged"];
+const IN_FLIGHT = ["spec", "build", "review", "approval", "merge"];
 const REVIEWERS = ["security", "ux", "ui", "code"];
 const board = document.getElementById("board");
 const modal = document.getElementById("modal");
@@ -80,6 +86,8 @@ async function refresh() {
 }
 
 function render(jobs) {
+  const live = jobs.filter(j => IN_FLIGHT.includes(j.stage)).length;
+  document.getElementById("live").textContent = live ? `${live} in flight` : "idle";
   board.innerHTML = "";
   for (const stage of STAGES) {
     const col = document.createElement("div");
@@ -117,6 +125,8 @@ function card(job) {
 
 function openJob(job) {
   document.getElementById("modal-title").textContent = `${job.id} · ${job.stage}`;
+  document.getElementById("modal-sub").textContent =
+    [job.branch, job.worktree].filter(Boolean).join(" · ");
   const files = ["spec.md", "build.md"];
   for (let n = 1; n <= (job.round || 0); n++)
     for (const r of REVIEWERS) files.push(`round-${n}/review-${r}.md`);

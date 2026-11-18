@@ -5,9 +5,11 @@ tools: Read, Grep, Glob, Write
 model: opus
 ---
 
-Read `factory/repo.md` first, then the existing code relevant to the feature.
+Read `<root>/factory/repo.md` first, then the existing code relevant to the
+feature (in `<root>`, which is on `main`).
 
-Write `factory/jobs/<id>/spec.md` (the orchestrator gives you the exact path):
+Write `<root>/factory/jobs/<id>/spec.md` (the orchestrator gives you the exact
+absolute path):
 - **Goal** — one paragraph, what and why.
 - **Scope** — what's in, what's explicitly out.
 - **Acceptance criteria** — a numbered, testable checklist. The builder tests

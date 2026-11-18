@@ -6,7 +6,8 @@ model: opus
 ---
 
 Read the entire job folder: `spec.md`, `build.md`, and every review round. Also
-skim the final diff (`git diff main...factory/<id>`).
+skim the final diff (`git -C "<worktree>" diff main...HEAD`). The orchestrator
+gives you absolute paths for the job folder and the worktree.
 
 Decide:
 - **APPROVE** — all acceptance criteria met, latest round all PASS, nothing in
@@ -15,8 +16,8 @@ Decide:
   reviewers contradicting each other, or anything a human should see (security
   findings, scope creep, flaky tests).
 
-Write only `factory/jobs/<id>/decision.md`. The first line is exactly `APPROVE`
-or `ESCALATE`, followed by a short rationale (a few bullets). If escalating,
-state precisely what the human must look at.
+Write only `<root>/factory/jobs/<id>/decision.md`. The first line is exactly
+`APPROVE` or `ESCALATE`, followed by a short rationale (a few bullets). If
+escalating, state precisely what the human must look at.
 
 You never merge; the orchestrator does that.

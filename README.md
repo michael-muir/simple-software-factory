@@ -26,10 +26,20 @@ one file. Reviews start with `VERDICT: PASS` or `VERDICT: CHANGES`;
 `decision.md` starts with `APPROVE` or `ESCALATE`. The builder works on a
 `factory/<id>` branch and is resumed (never respawned) for each review round.
 
+## Parallel jobs
+
+Up to 3 jobs run at once. Each job gets its own git worktree at
+`.worktrees/<id>` on branch `factory/<id>`, so builders never share a working
+directory. The main checkout stays on `main` and holds the board and every
+job's markdown files. Approved jobs pass through a **merge gate** one at a
+time: the branch is synced with `main` (the builder resolves any conflicts and
+re-runs tests), merged, and its worktree removed. Escalated jobs keep their
+worktree for a human to inspect.
+
 ## Commands
 
 - `/factory <feature>` — run a new job through the loop
-- `/factory next` — run the first unchecked item in `factory/backlog.md`
+- `/factory next [n]` — start the first `n` unchecked items in `factory/backlog.md`
 - `/factory approve <id>` — merge a `needs-human` job into main
 - `/factory rework <id> <feedback>` — send a job back to the builder
 
@@ -54,6 +64,7 @@ factory/board.json                durable state, drives the dashboard
 factory/dashboard.html            the visual board
 factory/backlog.md                feature queue for /factory next
 factory/jobs/<id>/                spec.md, build.md, round-N/, decision.md
+.worktrees/<id>/                  a job's code, on factory/<id> (gitignored)
 ```
 
 To change the factory, edit `SKILL.md` (the loop) or the agent files (the
