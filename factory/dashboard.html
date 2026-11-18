@@ -24,7 +24,7 @@
   .col.needs-human h2 { color: var(--human); }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
           padding: 10px; margin-bottom: 8px; cursor: pointer; }
-  .card:hover { border-color: var(--dim); }
+  .card:hover, .card:focus-visible { border-color: var(--dim); outline: none; }
   .card.human { border-color: var(--human); box-shadow: 0 0 0 1px var(--human); }
   .card .id { font-size: 11px; color: var(--dim); font-family: ui-monospace, monospace; }
   .card .title { margin: 2px 0 8px; font-weight: 600; }
@@ -73,12 +73,10 @@ const board = document.getElementById("board");
 const modal = document.getElementById("modal");
 
 async function refresh() {
-  let jobs = [];
   try {
     const res = await fetch("board.json", { cache: "no-store" });
-    jobs = (await res.json()).jobs || [];
-  } catch (e) { /* keep last render */ }
-  render(jobs);
+    render((await res.json()).jobs || []);
+  } catch (e) { /* mid-write or server gone: keep last render */ }
 }
 
 function render(jobs) {
@@ -94,19 +92,26 @@ function render(jobs) {
   }
 }
 
+const esc = s => String(s).replace(/[&<>"']/g,
+  c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 function card(job) {
   const el = document.createElement("div");
   el.className = "card" + (job.stage === "needs-human" ? " human" : "");
   const chips = REVIEWERS.map(r => {
-    const v = (job.reviews || {})[r] || "pending";
-    return `<div class="chip ${v}">${r}</div>`;
+    const v = String((job.reviews || {})[r] || "pending").toUpperCase();
+    const cls = v === "PASS" || v === "CHANGES" ? v : "pending";
+    return `<div class="chip ${cls}">${r}</div>`;
   }).join("");
   el.innerHTML = `
-    <div class="id">${job.id}</div>
-    <div class="title">${job.title || job.id}</div>
-    ${job.round ? `<div class="round">round ${job.round}</div>` : ""}
+    <div class="id">${esc(job.id)}</div>
+    <div class="title">${esc(job.title || job.id)}</div>
+    ${job.round ? `<div class="round">round ${esc(job.round)}</div>` : ""}
     <div class="chips">${chips}</div>`;
+  el.tabIndex = 0;
+  el.setAttribute("role", "button");
   el.onclick = () => openJob(job);
+  el.onkeydown = e => { if (e.key === "Enter") openJob(job); };
   return el;
 }
 

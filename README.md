@@ -36,7 +36,8 @@ one file. Reviews start with `VERDICT: PASS` or `VERDICT: CHANGES`;
 ## Dashboard
 
 ```sh
-cd factory && python3 -m http.server 8000
+cd factory
+python3 -m http.server 8000   # Windows: py -m http.server 8000
 # open http://localhost:8000/dashboard.html
 ```
 

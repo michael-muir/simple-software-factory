@@ -17,8 +17,9 @@ read the files you point them at and write their own single output file.
 - `/factory approve <job-id>` — merge a `needs-human` job's branch into main and
   set its stage to `merged`.
 - `/factory rework <job-id> <feedback>` — write the feedback to
-  `factory/jobs/<id>/rework.md`, resume the job's builder pointing at that file,
-  then run a fresh review round.
+  `factory/jobs/<id>/rework.md`, resume the job's builder pointing at that file
+  (if that builder no longer exists — e.g. a new session — spawn a fresh
+  `builder-<id>`), then run a fresh review round.
 
 ## Step 0 — inspect the repo
 
@@ -51,9 +52,10 @@ against the spec's acceptance criteria, commits, and writes
 Keep this builder alive — you will resume it, never spawn a second one.
 
 ### 3. Review round (parallel)
-Increment `round` on the board, create `factory/jobs/<id>/round-<n>/`, and spawn
-all four reviewers **in parallel**, each pointed at the spec, the branch diff,
-and its own output file in the round folder:
+Board: `stage: "review"`, increment `round`, reset all four `reviews` to
+`"pending"`. Create `factory/jobs/<id>/round-<n>/` and spawn all four reviewers
+**in parallel**, each pointed at the spec, the branch diff, and its own output
+file in the round folder:
 
 | agent           | model  | writes                |
 |-----------------|--------|-----------------------|
@@ -68,15 +70,17 @@ As each verdict file lands, update `reviews` on the board (`PASS` / `CHANGES`).
 folder. Never resume the builder mid-round.
 
 ### 4. Route
-- **Any CHANGES** → resume `builder-<id>` with SendMessage, pointing it at the
-  round folder (`round-<n>/`). It fixes, commits, appends to `build.md`. Then go
-  back to step 3 for a new round. **Max 2 rounds**: if round 2 still has
-  CHANGES, skip to the approver anyway — it will likely escalate.
+- **Any CHANGES** → board: `stage: "build"` (leave the failed verdicts visible),
+  then resume `builder-<id>` with SendMessage, pointing it at the round folder
+  (`round-<n>/`). It fixes, commits, appends to `build.md`. Then go back to
+  step 3 for a new round. **Max 2 rounds**: if round 2 still has CHANGES, skip
+  to the approver anyway — it will likely escalate.
 - **All PASS** → approver.
 
 ### 5. approver (opus)
-Spawn the `approver` agent pointed at the job folder. It writes
-`factory/jobs/<id>/decision.md` starting with `APPROVE` or `ESCALATE`.
+Board: `stage: "approval"`. Spawn the `approver` agent pointed at the job
+folder. It writes `factory/jobs/<id>/decision.md` starting with `APPROVE` or
+`ESCALATE`.
 - `APPROVE` → merge `factory/<id>` into main, board `stage: "merged"`.
 - `ESCALATE` → board `stage: "needs-human"`. A human runs `/factory approve`
   or `/factory rework`.
