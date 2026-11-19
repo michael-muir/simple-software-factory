@@ -2,12 +2,24 @@
 
 ## State
 
-There is **no application code yet**. The repo holds only the factory itself
-(`.claude/`, `factory/`, `README.md`, `BUILD_PROMPT.md`). Don't modify any of
-those; they are not part of the product.
+The product is `greet.py`, a small greeting CLI (default `Hello, world!`, plus a
+`--name` flag), with tests in `tests/test_greet.py`. The factory itself
+(`.claude/`, `factory/`, `README.md`, `BUILD_PROMPT.md`, `.gitignore`) is not
+part of the product; feature work never modifies it.
 
 Several jobs run in parallel from the same `main`, so the conventions below are
 fixed here up front. Follow them exactly so branches merge cleanly.
+
+## Setup
+
+None. Python 3 standard library only; a fresh checkout or worktree needs
+nothing installed.
+
+## Dev server
+
+None. The product is a command-line tool with no pages to serve. If a prompt
+gives you a port, you won't need it unless a spec adds a web surface; check
+behaviour by running the CLI, e.g. `python greet.py --name Ada`.
 
 ## Language and tooling
 
@@ -29,7 +41,7 @@ tests/test_greet.py   # unittest tests for greet.py
 - Keep logic in small functions that tests can call directly; `main()` only
   parses args and prints.
 
-## Tests
+## Validation
 
 ```
 python -m unittest discover -s tests -v

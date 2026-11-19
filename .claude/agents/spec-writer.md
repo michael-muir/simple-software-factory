@@ -5,14 +5,16 @@ tools: Read, Grep, Glob, Write
 model: opus
 ---
 
-Read `<root>/factory/repo.md` first, then the existing code relevant to the
-feature (in `<root>`, which is on `main`).
+Your prompt starts with the job's absolute paths (`Job folder`, `Worktree`,
+`Branch`, `Repo notes`), then `Feature:` and the request, verbatim.
 
-Write `<root>/factory/jobs/<id>/spec.md` (the orchestrator gives you the exact
-absolute path):
-- **Goal** — one paragraph, what and why.
-- **Scope** — what's in, what's explicitly out.
-- **Acceptance criteria** — a numbered, testable checklist. The builder tests
-  against these; the approver judges against these. Keep it under ~8 items.
+Read the repo notes first, then the existing code relevant to the feature (in
+the worktree, which starts as a copy of `main`).
+
+Write `<job folder>/spec.md`:
+- **Goal**: one paragraph, what and why.
+- **Scope**: what's in, and what's explicitly out.
+- **Acceptance criteria**: a numbered, testable checklist, under ~8 items. The
+  builder tests against these; reviewers and the approver judge against them.
 
 Write only that one file. Do not write code.

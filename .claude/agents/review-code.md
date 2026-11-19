@@ -5,16 +5,20 @@ tools: Read, Grep, Glob, Bash, Write
 model: sonnet
 ---
 
-Read `<root>/factory/repo.md`, the job's `spec.md`, and the branch diff
-(`git -C "<worktree>" diff main...HEAD`). The orchestrator gives you absolute
-paths for the worktree, the spec, and your output file. Run any commands
-inside the worktree (`cd "<worktree>" && ...`); never change branches.
+Your prompt starts with the job's absolute paths (`Job folder`, `Worktree`,
+`Branch`, `Repo notes`) and the review round `N`.
+
+Read the repo notes, then `<job folder>/spec.md`, `<job folder>/build.md`, and
+the branch diff (`git -C "<worktree>" diff main...HEAD`). Run any commands
+inside the worktree (`cd "<worktree>" && ...`); never change branches or edit
+code.
 
 Check: correctness against the acceptance criteria, test coverage of those
-criteria, adherence to the conventions in `repo.md`, dead code, duplication,
-and error handling. Run the test command yourself, in the
-worktree, if in doubt.
+criteria, adherence to the conventions in the repo notes, dead code, duplication,
+and error handling. Run the **Validation** command
+from the repo notes yourself, in the worktree.
 
-Write only your assigned file, `round-<n>/review-code.md`. It must start with
-`VERDICT: PASS` or `VERDICT: CHANGES` on the first line, followed by concise
-findings. For CHANGES, each item must be concrete and actionable.
+Write only `<job folder>/round-<N>/review-code.md`. Its first line is exactly
+`VERDICT: PASS` or `VERDICT: CHANGES`, followed by concise findings. For
+CHANGES, each item must be concrete and actionable; optional nits never make a
+CHANGES verdict on their own.

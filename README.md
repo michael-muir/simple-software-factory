@@ -14,7 +14,7 @@ of `factory/board.json`.
 feature → spec-writer → builder → [security · ux · ui · code] reviews
             (opus)      (opus)      (wait for ALL four verdicts)
                            ▲                 │
-                           └── any CHANGES ──┘  (max 2 rounds)
+                           └── any CHANGES ──┘  (max 3 rounds)
                                              │ all PASS
                                              ▼
                                          approver → merge, or needs-human
@@ -22,9 +22,13 @@ feature → spec-writer → builder → [security · ux · ui · code] reviews
 ```
 
 Agents get context from files, not the conversation, and each writes exactly
-one file. Reviews start with `VERDICT: PASS` or `VERDICT: CHANGES`;
-`decision.md` starts with `APPROVE` or `ESCALATE`. The builder works on a
-`factory/<id>` branch and is resumed (never respawned) for each review round.
+one file. `build.md` starts with `STATUS: READY` or `STATUS: BLOCKED`; reviews
+start with `VERDICT: PASS` or `VERDICT: CHANGES`; `decision.md` starts with
+`APPROVE` or `ESCALATE`. The builder works on a `factory/<id>` branch and is
+resumed (never respawned) for each review round. A blocked build, review rounds
+running out, an escalation, or a main checkout that isn't clean all stop the
+job in `needs-human`, and the orchestrator tells you why. It reports one line
+per step, merges locally, and never pushes.
 
 ## Parallel jobs
 
@@ -41,7 +45,8 @@ worktree for a human to inspect.
 - `/factory <feature>` — run a new job through the loop
 - `/factory next [n]` — start the first `n` unchecked items in `factory/backlog.md`
 - `/factory approve <id>` — merge a `needs-human` job into main
-- `/factory rework <id> <feedback>` — send a job back to the builder
+- `/factory rework <id> <note>` — send a `needs-human` job back to a fresh
+  builder (the note is saved as `rework-<k>.md`)
 
 ## Dashboard
 

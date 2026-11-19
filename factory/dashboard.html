@@ -113,7 +113,7 @@ function card(job) {
   }).join("");
   el.innerHTML = `
     <div class="id">${esc(job.id)}</div>
-    <div class="title">${esc(job.title || job.id)}</div>
+    <div class="title">${esc(job.title || job.feature || job.id)}</div>
     ${job.round ? `<div class="round">round ${esc(job.round)}</div>` : ""}
     <div class="chips">${chips}</div>`;
   el.tabIndex = 0;
@@ -128,6 +128,7 @@ function openJob(job) {
   document.getElementById("modal-sub").textContent =
     [job.branch, job.worktree].filter(Boolean).join(" · ");
   const files = ["spec.md", "build.md"];
+  for (let k = 1; k <= (job.reworks || 0); k++) files.push(`rework-${k}.md`);
   for (let n = 1; n <= (job.round || 0); n++)
     for (const r of REVIEWERS) files.push(`round-${n}/review-${r}.md`);
   files.push("decision.md");

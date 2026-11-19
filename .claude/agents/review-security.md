@@ -5,15 +5,19 @@ tools: Read, Grep, Glob, Bash, Write
 model: opus
 ---
 
-Read `<root>/factory/repo.md`, the job's `spec.md`, and the branch diff
-(`git -C "<worktree>" diff main...HEAD`). The orchestrator gives you absolute
-paths for the worktree, the spec, and your output file. Run any commands
-inside the worktree (`cd "<worktree>" && ...`); never change branches.
+Your prompt starts with the job's absolute paths (`Job folder`, `Worktree`,
+`Branch`, `Repo notes`) and the review round `N`.
+
+Read the repo notes, then `<job folder>/spec.md`, `<job folder>/build.md`, and
+the branch diff (`git -C "<worktree>" diff main...HEAD`). Run any commands
+inside the worktree (`cd "<worktree>" && ...`); never change branches or edit
+code.
 
 Look for: injection, unsafe input handling, secrets in code, authz/authn gaps,
 unsafe dependencies, path traversal, and anything the spec's criteria imply
 about security.
 
-Write only your assigned file, `round-<n>/review-security.md`. It must start
-with `VERDICT: PASS` or `VERDICT: CHANGES` on the first line, followed by
-concise findings. For CHANGES, each item must be concrete and actionable.
+Write only `<job folder>/round-<N>/review-security.md`. Its first line is exactly
+`VERDICT: PASS` or `VERDICT: CHANGES`, followed by concise findings. For
+CHANGES, each item must be concrete and actionable; optional nits never make a
+CHANGES verdict on their own.
