@@ -78,10 +78,15 @@ const REVIEWERS = ["security", "ux", "ui", "code"];
 const board = document.getElementById("board");
 const modal = document.getElementById("modal");
 
+let lastBoard = null;
 async function refresh() {
   try {
     const res = await fetch("board.json", { cache: "no-store" });
-    render((await res.json()).jobs || []);
+    const text = await res.text();
+    const jobs = JSON.parse(text).jobs || [];
+    if (text === lastBoard) return;  // unchanged: keep focus and hover state
+    lastBoard = text;
+    render(jobs);
   } catch (e) { /* mid-write or server gone: keep last render */ }
 }
 
@@ -119,7 +124,9 @@ function card(job) {
   el.tabIndex = 0;
   el.setAttribute("role", "button");
   el.onclick = () => openJob(job);
-  el.onkeydown = e => { if (e.key === "Enter") openJob(job); };
+  el.onkeydown = e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openJob(job); }
+  };
   return el;
 }
 
@@ -144,14 +151,18 @@ function openJob(job) {
   modal.showModal();
 }
 
+let shown = 0;  // ignore fetches that finish after a newer tab was clicked
 async function showFile(job, file, btn) {
+  const me = ++shown;
   document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
   const doc = document.getElementById("doc");
+  let text;
   try {
     const res = await fetch(`jobs/${job.id}/${file}`, { cache: "no-store" });
-    doc.textContent = res.ok ? await res.text() : `(${file} not written yet)`;
-  } catch (e) { doc.textContent = `(could not load ${file})`; }
+    text = res.ok ? await res.text() : `(${file} not written yet)`;
+  } catch (e) { text = `(could not load ${file})`; }
+  if (me === shown) doc.textContent = text;
 }
 
 refresh();
