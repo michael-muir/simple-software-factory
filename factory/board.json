@@ -1,3 +1,32 @@
 {
-  "jobs": []
+  "jobs": [
+    {
+      "id": "001-hello-world-cli",
+      "title": "Hello-world CLI",
+      "branch": "factory/001-hello-world-cli",
+      "worktree": ".worktrees/001-hello-world-cli",
+      "stage": "merged",
+      "round": 1,
+      "reviews": {
+        "security": "PASS",
+        "ux": "PASS",
+        "ui": "PASS",
+        "code": "PASS"
+      }
+    },
+    {
+      "id": "002-name-flag",
+      "title": "--name flag",
+      "branch": "factory/002-name-flag",
+      "worktree": ".worktrees/002-name-flag",
+      "stage": "merged",
+      "round": 1,
+      "reviews": {
+        "security": "PASS",
+        "ux": "PASS",
+        "ui": "PASS",
+        "code": "PASS"
+      }
+    }
+  ]
 }
