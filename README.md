@@ -63,7 +63,7 @@ spec, build notes, reviews, and decision.
 factory/board.json                durable state, drives the dashboard
 factory/dashboard.html            the visual board
 factory/backlog.md                feature queue for /factory next
-factory/jobs/<id>/                spec.md, build.md, round-N/, decision.md
+factory/jobs/<id>/                spec.md, build.md, round-N/, decision.md (gitignored)
 .worktrees/<id>/                  a job's code, on factory/<id> (gitignored)
 ```
 

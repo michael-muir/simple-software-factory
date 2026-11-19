@@ -55,7 +55,8 @@ config, directory layout, commit style). Write what you find to
 "Read `<root>/factory/repo.md` first." If the repo is empty, say so in
 `repo.md` and tell the builder to establish sensible conventions.
 
-Make sure `.worktrees/` is in `.gitignore` (add it and commit on main if not),
+Make sure `.worktrees/` and `factory/jobs/` are in `.gitignore` (add them and
+commit on main if not; job files are local run records, never committed),
 and run `git worktree prune` to clear stale entries.
 
 ## Job setup (per job)
