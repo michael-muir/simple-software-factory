@@ -72,7 +72,9 @@ parallel jobs never see each other's pages.
 
 **At most 3 jobs in flight per session.** If asked for more, start 3; append
 any extra `/factory <feature>` to `backlog.md` as `- [ ]`, and claim the next
-backlog item each time one of your jobs reaches `merged` or `needs-human`.
+backlog item each time one of your jobs reaches `merged` or `needs-human`,
+until everything you were asked for has started. Never claim backlog items
+nobody asked this session to run.
 
 ## Step 0: inspect the repo (once per session, before starting any job)
 
@@ -122,7 +124,7 @@ re-read them to see what each job is waiting on.
 ### 1. Spec
 Spawn `spec-writer` with the prompt `<paths> Feature: <feature, verbatim>`.
 When it finishes, check that `spec.md` exists and has acceptance criteria; if
-not, stop and tell the user. Board: `stage: "build"`.
+not, go to **Needs human**. Board: `stage: "build"`.
 
 ### 2. Build
 Spawn `builder` **with the name `builder-<id>`** and the prompt
@@ -133,8 +135,7 @@ never spawn a second one (except for a rework). When it finishes, go to
 ### Build check
 Read the first line of `build.md`:
 - `STATUS: READY`: start the next review round.
-- `STATUS: BLOCKED`: go to **Needs human**.
-- anything else, or no `build.md`: stop and tell the user.
+- `STATUS: BLOCKED`, anything else, or no `build.md`: go to **Needs human**.
 
 ### 3. Review round N
 1. Board: `stage: "review"`, `round: N`, all four `reviews` `"pending"`.
@@ -155,8 +156,8 @@ Read the first line of `build.md`:
    so the chips fill in as they land. The round is done only when all four
    files exist in `round-<N>/`. Never resume the builder mid-round. If a
    reviewer finishes without writing its file, or its first line isn't
-   `VERDICT: PASS` or `VERDICT: CHANGES`, stop that job and tell the user.
-   (Other jobs keep moving meanwhile.)
+   `VERDICT: PASS` or `VERDICT: CHANGES`, wait for the rest of the round, then
+   send that job to **Needs human**. (Other jobs keep moving meanwhile.)
 4. Decide:
    - **All PASS**: go to **Approve**.
    - **Any CHANGES, resumes left**: board `stage: "build"` (leave the failed
@@ -173,8 +174,7 @@ Read the first line of `build.md`:
 Board: `stage: "approval"`. Spawn `approver` with `<paths> Final round: N.`
 When it finishes, read the first line of `decision.md`:
 - `APPROVE`: go to **Merge gate**.
-- `ESCALATE`: go to **Needs human**.
-- anything else, or no `decision.md`: stop and tell the user.
+- `ESCALATE`, anything else, or no `decision.md`: go to **Needs human**.
 
 ### 5. Merge gate (one job at a time)
 Other jobs may have merged since this branch was cut. Board `stage: "merge"`.
@@ -200,14 +200,15 @@ Never run two merge gates at once; queue them.
    `git branch -d factory/<id>`. If removing the worktree fails, the job is
    still merged: tell the user what `git worktree remove` printed.
 5. Board `stage: "merged"`. Replace the job's backlog line with `- [x] <item> → <id>`
-   if it came from there, and claim the next backlog item if a slot is free.
+   if it came from there. A slot is free: see the 3-job limit under **Commands**.
 
 **Never push.** Pushing is the user's call.
 
 ### Needs human
 Board `stage: "needs-human"`. The branch and its worktree stay for the human to
 inspect. Tell the user which job is waiting, give the worktree path, and quote
-`decision.md` (or the BLOCKED reason from `build.md`, or what failed).
+`decision.md` (or the BLOCKED reason from `build.md`, or what failed). A slot
+is free: see the 3-job limit under **Commands**.
 
 ## Backlog
 

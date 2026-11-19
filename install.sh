@@ -50,6 +50,9 @@ TARGET="$(cd "$target" && pwd -P)"
 [ "$TARGET" != "$SRC" ] || die "that is the factory repository itself"
 git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || die "$TARGET is not a git repository (the factory needs git worktrees)"
+# The orchestrator works from the repo root, so the factory must live there.
+[ -z "$(git -C "$TARGET" rev-parse --show-prefix)" ] \
+  || die "$TARGET is inside a git repository; point at its top level: $(git -C "$TARGET" rev-parse --show-toplevel)"
 
 # Files this script owns, relative to the repo root.
 managed_files() {
@@ -60,7 +63,9 @@ managed_files() {
     echo factory/dashboard.html
   ) | sed 's#^\./##' | sort
 }
-mapfile -t FILES < <(managed_files)
+# (a read loop, not mapfile: macOS still ships bash 3.2)
+FILES=()
+while IFS= read -r f; do FILES+=("$f"); done < <(managed_files)
 
 installed=0
 [ -f "$TARGET/.claude/skills/factory/SKILL.md" ] && installed=1
@@ -106,6 +111,8 @@ else
   say "Upgrading the software factory in $TARGET ($old_version -> $version)"
 fi
 
+added=0; updated=0; same=0; removed=0
+
 # --- remove files a previous version installed but this one no longer has ---
 if [ "$mode" = "upgrade" ] && [ -f "$TARGET/$MANIFEST" ]; then
   while IFS= read -r old; do
@@ -114,14 +121,13 @@ if [ "$mode" = "upgrade" ] && [ -f "$TARGET/$MANIFEST" ]; then
     keep=0
     for f in "${FILES[@]}"; do [ "$f" = "$old" ] && keep=1 && break; done
     if [ "$keep" -eq 0 ] && [ -f "$TARGET/$old" ]; then
-      act "removed   $old"
+      act "removed   $old"; removed=$((removed + 1))
       [ "$dry" -eq 1 ] || rm -f "$TARGET/$old"
     fi
   done < "$TARGET/$MANIFEST"
 fi
 
 # --- copy managed files -----------------------------------------------------
-added=0; updated=0; same=0
 for f in "${FILES[@]}"; do
   if [ ! -e "$TARGET/$f" ]; then
     act "added     $f"; added=$((added + 1))
@@ -167,7 +173,9 @@ if [ "$dry" -eq 0 ]; then
   printf '%s\n%s\n' "$version" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TARGET/$VERSION_FILE"
 fi
 
-say "Done: $added added, $updated updated, $same unchanged."
+summary="Done: $added added, $updated updated, $same unchanged"
+[ "$removed" -eq 0 ] || summary="$summary, $removed removed"
+say "$summary."
 if [ "$dry" -eq 1 ]; then
   say "Dry run: nothing was changed."
 elif [ "$mode" = "install" ]; then
