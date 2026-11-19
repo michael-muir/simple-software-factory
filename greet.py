@@ -1,7 +1,4 @@
-"""A small command-line greeting.
-
-Prints ``Hello, world!`` by default, or ``Hello, NAME!`` with ``--name NAME``.
-"""
+"""A small command-line script that prints a greeting."""
 
 import argparse
 import sys
@@ -10,7 +7,7 @@ DEFAULT_NAME = "world"
 
 
 def greeting(name: str = DEFAULT_NAME) -> str:
-    """Return the greeting for ``name``, e.g. ``"Hello, Ada!"``."""
+    """Return the greeting for ``name``; the default is ``"Hello, world!"``."""
     return f"Hello, {name}!"
 
 
@@ -26,8 +23,8 @@ def parse_name(value: str) -> str:
     return name
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Return the argument parser for the greeting CLI."""
+def main(argv: list[str] | None = None) -> int:
+    """Parse command-line arguments, print the greeting and return 0."""
     parser = argparse.ArgumentParser(description="Print a friendly greeting.")
     parser.add_argument(
         "--name",
@@ -36,12 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="NAME",
         help="name to greet (default: %(default)s)",
     )
-    return parser
-
-
-def main(argv: list[str] | None = None) -> int:
-    """Run the CLI with ``argv`` (``None`` means ``sys.argv[1:]``)."""
-    args = build_parser().parse_args(argv)
+    args = parser.parse_args(argv)
     print(greeting(args.name))
     return 0
 
