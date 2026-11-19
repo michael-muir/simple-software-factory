@@ -253,9 +253,9 @@ When a job ends, say whether it merged or needs a human, and why.
   "jobs": [
     {
       "id": "003-rate-limiting",
-      "feature": "Rate-limit the greeting to 5 calls per minute",
+      "feature": "Rate limit the signup form",
       "branch": "factory/003-rate-limiting",
-      "worktree": "D:/GitHub/my-app/.worktrees/003-rate-limiting",
+      "worktree": "/home/you/code/my-app/.worktrees/003-rate-limiting",
       "stage": "review",
       "round": 2,
       "reworks": 0,

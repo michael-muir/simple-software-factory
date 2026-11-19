@@ -4,6 +4,40 @@ A tiny, visual software factory built from one Claude Code skill, seven
 subagents, and markdown files. Everything a viewer needs fits in a few minutes
 of reading.
 
+## Install into a project
+
+Clone this repository, then point the installer at your project (a git repo):
+
+```sh
+git clone https://github.com/michael-muir/simple-software-factory.git
+./simple-software-factory/install.sh /path/to/your-project
+```
+
+It adds the skill, the seven agents and the dashboard, creates an empty
+`factory/backlog.md` and `factory/board.json`, and adds `.worktrees/` and
+`factory/jobs/` to `.gitignore`. It refuses to overwrite any existing file
+unless you pass `--force`. Add `--dry-run` to see what it would do. Then
+commit the new files, add features to `factory/backlog.md`, and run
+`/factory next` in Claude Code. The first run inspects your repo and writes
+`factory/repo.md` (setup, validation command, conventions) for the agents.
+
+## Upgrade in place
+
+Pull the latest factory, then upgrade the project:
+
+```sh
+git -C simple-software-factory pull
+./simple-software-factory/install.sh --upgrade /path/to/your-project
+```
+
+An upgrade replaces the factory's own files (the skill, agents and dashboard)
+with the new versions, removes any the new version no longer ships, and leaves
+your project's state alone: `backlog.md`, `board.json`, `repo.md` and
+`factory/jobs/` are never touched. Local edits to the factory's own files are
+overwritten, so review `git diff` before committing. It won't run while jobs
+are in progress unless you pass `--force`. The installed version is recorded in
+`.claude/skills/factory/.factory-version`.
+
 ## How it works
 
 Run `/factory <feature>` in Claude Code. That session becomes the
@@ -52,23 +86,26 @@ worktree for a human to inspect.
 
 ```sh
 cd factory
-python3 -m http.server 8000   # Windows: py -m http.server 8000
+python -m http.server 8000   # or python3, depending on your system
 # open http://localhost:8000/dashboard.html
 ```
 
 Jobs appear as cards moving across stages, with reviewer chips filling in as
 verdicts land. `needs-human` jobs are highlighted. Click a card to read its
-spec, build notes, reviews, and decision.
+spec, build notes, rework notes, reviews, and decision.
 
 ## Layout
 
 ```
+install.sh                        install into / upgrade a project (this repo only)
 .claude/skills/factory/SKILL.md   the orchestrator's instructions
 .claude/agents/*.md               one file per agent in the loop
-factory/board.json                durable state, drives the dashboard
 factory/dashboard.html            the visual board
+factory/board.json                durable state, drives the dashboard
 factory/backlog.md                feature queue for /factory next
-factory/jobs/<id>/                spec.md, build.md, round-N/, decision.md (gitignored)
+factory/repo.md                   repo notes, written by the first /factory run
+factory/jobs/<id>/                spec.md, build.md, rework-K.md, round-N/,
+                                  decision.md (gitignored)
 .worktrees/<id>/                  a job's code, on factory/<id> (gitignored)
 ```
 
